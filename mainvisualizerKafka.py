@@ -27,6 +27,7 @@ def decode_json(msg):
 
 def gest_thread(thread_name,config_info):
     global stampa
+    global listastampa
     consumer = KafkaConsumer(thread_name,
                             bootstrap_servers=config_info["bootstrapservers"],
                             security_protocol=config_info["security_protocol"],
@@ -42,11 +43,14 @@ def gest_thread(thread_name,config_info):
         tempointero=int(msg_value["wear_time"])*1e-6
         timestamp = datetime.datetime.fromtimestamp(tempointero)
         print(timestamp.strftime('%Y-%m-%d %H:%M:%S'))
-        stringfinale="Gesture detected: "+str(msg_value["gesture_name"])+". Esecuted by Body id "+str(msg_value['body_id'])+". Was shaked wearable "+ str(msg_value['wear_id']) + ", time: "+str(timestamp)+"|||||||||||||||||||||||||||||||||"
+        stringfinale="Gesture detected: "+str(msg_value["gesture_name"])+". Was shaked wearable "+ str(msg_value['wear_id']) + ", time: "+str(timestamp)
         tempo=str(msg_value)
         print(tempo)
+        #senddata=html.P([stringfinale, html.Br()])
+        listastampa.append(stringfinale)
+        listastampa.append(html.Br())
 
-        stampa = stampa + stringfinale + "\n"+"                                                    "
+        #stampa = stampa + stringfinale #+ html.Br()
 
 
 """def pose_thread(thread_name,config_info):
@@ -78,7 +82,11 @@ def gest_thread(thread_name,config_info):
 
 def visualizerapp():
     global stampa
-    stampa="Elenco gesture riconosciute:\n"
+    global listastampa
+    listastampa=["All detected gestures:", html.Br()]
+    #stampa=html.P(["All detected gestures:", html.Br()])
+    stampa=html.P(listastampa)
+    provaacapo='<p>ciao<br> ciao<\p>'
     path = "data_config_gestures.json"
     config_info = read_filejson(path)
     """pose_aggregatorThread = threading.Thread(target=pose_thread,
@@ -108,20 +116,9 @@ def visualizerapp():
     @app.callback(Output('live-update-text', 'children'),
                   Input('interval-component', 'n_intervals'))
     def update_metrics(n):
-        #
-        '''if consumer is not None:
-            #print(msg)
-            for msg in consumer:
-                #msg=consumer[0]
-                #print(msg)
-
-                time = decode_json(msg)
-                print(time["timestamp"])
-                tempo=str(time["timestamp"])
-                stampa=stampa+ tempo+"\n"'''
-        time = datetime.datetime.now() - datetime.timedelta()
-        return stampa
-
+         #time = datetime.datetime.now() - datetime.timedelta()
+        return html.P(listastampa)
+        # return provaacapo
     gestThread.start()
     app.run_server(debug=True)
 
@@ -266,6 +263,7 @@ def print_ploty (msg):
         ),
         dcc.Graph(id="graph"),
     ])"""
+
 def main():
     visualizerapp()
 
